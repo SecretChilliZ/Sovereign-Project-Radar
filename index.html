@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sovereign Project Radar & Audit</title>
+  <style>
+    :root {
+      --bg: #090d13;
+      --card-bg: rgba(18, 24, 34, 0.9);
+      --card-border: rgba(48, 54, 61, 0.7);
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent-s: #2ea043;
+      --accent-a: #388bfd;
+      --accent-b: #d29922;
+      --accent-c: #484f58;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+    .container { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; }
+    
+    .header-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .header-top {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    @media (min-width: 768px) {
+      .header-top { flex-direction: row; justify-content: space-between; align-items: center; }
+    }
+    .badges { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .tag-badge {
+      font-family: monospace; font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase;
+    }
+    .tag-green { background: #062e1b; color: #3fb950; border: 1px solid #1a5c32; }
+    .tag-blue { background: #0c2d6b; color: #58a6ff; border: 1px solid #1f4b99; }
+    
+    h1 { font-size: 1.75rem; font-weight: 900; letter-spacing: -0.025em; color: #fff; }
+    .subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      font-family: monospace;
+      text-align: center;
+    }
+    .stat-box {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.75rem;
+      padding: 0.6rem 0.5rem;
+    }
+    .stat-label { font-size: 0.65rem; color: var(--text-muted); }
+    .stat-value { font-size: 1.25rem; font-weight: 700; margin-top: 0.1rem; }
+    
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    @media (min-width: 768px) {
+      .controls { flex-direction: row; align-items: center; }
+    }
+    .search-input {
+      width: 100%;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 0.75rem;
+      padding: 0.65rem 1rem;
+      font-size: 0.875rem;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { border-color: var(--accent-s); }
+
+    .tier-buttons {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.75rem;
+    }
+    .tier-btn {
+      background: #21262d;
+      color: #c9d1d9;
+      border: none;
+      padding: 0.55rem 0.85rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .tier-btn.active {
+      background: var(--accent-s);
+      color: #fff;
+    }
+    
+    .projects-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 768px) { .projects-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .projects-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: 0.85rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .card:hover { transform: translateY(-2px); }
+    .card-S { border-color: rgba(46, 160, 67, 0.6); box-shadow: 0 0 12px rgba(46, 160, 67, 0.15); }
+    .card-A { border-color: rgba(56, 139, 253, 0.5); box-shadow: 0 0 12px rgba(56, 139, 253, 0.12); }
+    .card-B { border-color: rgba(210, 153, 34, 0.4); }
+    .card-C { border-color: rgba(48, 54, 61, 0.5); }
+
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+    .project-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    .project-status { font-family: monospace; font-size: 0.7rem; color: var(--text-muted); }
+    .rank-badge {
+      font-family: monospace; font-weight: 900; font-size: 0.85rem; padding: 0.25rem 0.6rem; border-radius: 0.5rem; color: #fff;
+    }
+    .badge-S { background: var(--accent-s); }
+    .badge-A { background: var(--accent-a); }
+    .badge-B { background: var(--accent-b); }
+    .badge-C { background: var(--accent-c); }
+
+    .tier-pill {
+      font-family: monospace; font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted);
+    }
+    .project-purpose { font-size: 0.8rem; color: #c9d1d9; line-height: 1.4; }
+
+    .card-footer {
+      padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+    .tag { font-family: monospace; font-size: 0.65rem; padding: 0.15rem 0.45rem; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+    .file-count { font-family: monospace; font-size: 0.65rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="header-card">
+      <div class="header-top">
+        <div>
+          <div class="badges">
+            <span class="tag-badge tag-green">XEONWRAITH TELEMETRY</span>
+            <span class="tag-badge tag-blue">61 PROJECTS AUDITED</span>
+          </div>
+          <h1>Sovereign Project Radar</h1>
+          <p class="subtitle">Autonomous Kernel Diagnostic, Compilation, and Architecture Audit</p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">TOTAL</div>
+            <div class="stat-value" style="color: #fff;">61</div>
+          </div>
+          <div class="stat-box" style="border-color: rgba(46, 160, 67, 0.4);">
+            <div class="stat-label" style="color: var(--accent-s);">S-TIER</div>
+            <div class="stat-value" style="color: var(--accent-s);">8</div>
+          </div>
+          <div class="stat-box" style="border-color: rgba(56, 139, 253, 0.4);">
+            <div class="stat-label" style="color: var(--accent-a);">A-TIER</div>
+            <div class="stat-value" style="color: var(--accent-a);">9</div>
+          </div>
+          <div class="stat-box" style="border-color: rgba(210, 153, 34, 0.4);">
+            <div class="stat-label" style="color: var(--accent-b);">AVG</div>
+            <div class="stat-value" style="color: var(--accent-b);">8.6</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input type="text" id="searchInput" placeholder="Search projects by name, technology, or purpose..." class="search-input">
+        <div class="tier-buttons">
+          <button onclick="filterTier('ALL')" id="btn-ALL" class="tier-btn active">ALL (61)</button>
+          <button onclick="filterTier('S')" id="btn-S" class="tier-btn">S (8)</button>
+          <button onclick="filterTier('A')" id="btn-A" class="tier-btn">A (9)</button>
+          <button onclick="filterTier('B')" id="btn-B" class="tier-btn">B (11)</button>
+          <button onclick="filterTier('C')" id="btn-C" class="tier-btn">C (33)</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="projectsGrid" class="projects-grid"></div>
+
+  </div>
+
+  <script>
+    const projects = [{"name": "AgentBuilder", "purpose": "Autonomous subagent factory and runtime generator grounded in 5-layer architecture.", "status": "Active Framework", "tier": "A", "rank": 9.2, "tags": ["Agentic", "Python", "5-Layer"], "file_count": 21}, {"name": "Ali_FineTune", "purpose": "Unsloth-based fine-tuning pipeline for Ali (conversational & clinical reasoning persona).", "status": "Production", "tier": "S", "rank": 9.5, "tags": ["Fine-Tuning", "Qwen 2.5 7B", "Unsloth"], "file_count": 3}, {"name": "AnsiMatrixEngine", "purpose": "High-performance ANSI/ASCII terminal graphics foundry and visual matrix renderer.", "status": "Production", "tier": "B", "rank": 8.8, "tags": ["Terminal", "TrueColor", "ANSI"], "file_count": 120}, {"name": "Any-code", "purpose": "Multi-modal multi-language code translation and syntax transformation utility.", "status": "Prototype", "tier": "C", "rank": 7.0, "tags": ["AST", "Cross-Compiler"], "file_count": 453}, {"name": "BatWallet", "purpose": "Cryptographic batch operations and local key storage ledger.", "status": "Archived", "tier": "C", "rank": 6.5, "tags": ["Crypto", "Ledger"], "file_count": 66}, {"name": "ChillShell", "purpose": "Custom PowerShell 7 terminal environment and fast startup UX engine with Doc ChilliZ branding.", "status": "Production Core", "tier": "S", "rank": 9.7, "tags": ["PowerShell 7", "Terminal", "Fast Boot"], "file_count": 3061}, {"name": "claude-code-transcripts", "purpose": "Parser and visualizer for Claude Code CLI transcript logs and tool call histories.", "status": "Observability", "tier": "B", "rank": 8.4, "tags": ["Observability", "Transcripts"], "file_count": 41}, {"name": "context-menu-manager", "purpose": "Python Tkinter / Win32 GUI for managing Windows Explorer context menu entries.", "status": "Desktop Utility", "tier": "B", "rank": 8.1, "tags": ["GUI", "Win32", "Registry"], "file_count": 87}, {"name": "ContrastRescue", "purpose": "Automated UI/UX accessibility and luminance contrast adjuster for VS Code themes.", "status": "Active Tool", "tier": "B", "rank": 8.0, "tags": ["Color Science", "Accessibility"], "file_count": 11}, {"name": "copilot-worktrees", "purpose": "Isolated branch and worktree manager for Copilot and AI coding assistants.", "status": "Operational", "tier": "C", "rank": 7.5, "tags": ["Git Worktrees", "CLI"], "file_count": 13668}, {"name": "deepseek_mcp", "purpose": "Model Context Protocol server for DeepSeek V4 Flash / R1 offloading & distillation.", "status": "Active MCP Core", "tier": "A", "rank": 9.3, "tags": ["MCP", "DeepSeek", "Air-Gap"], "file_count": 9}, {"name": "DEFCON", "purpose": "System security status and port tripwire sentry monitoring rig.", "status": "Security Sentry", "tier": "A", "rank": 8.9, "tags": ["Security", "Tripwires"], "file_count": 10}, {"name": "DocChilliZvsMS", "purpose": "Windows OS telemetry stripping and Microsoft bloatware debloating scripts.", "status": "Operational", "tier": "B", "rank": 8.7, "tags": ["Windows Debloat", "OS Hygiene"], "file_count": 8}, {"name": "EditorMD", "purpose": "Standalone fast markdown editor with live KaTeX and syntax highlighting.", "status": "Active GUI Tool", "tier": "B", "rank": 8.1, "tags": ["Markdown", "KaTeX", "Desktop"], "file_count": 521}, {"name": "Embedding-Gemma", "purpose": "Local vector embedding extraction and semantic search indexing using Google Gemma.", "status": "Pipeline", "tier": "B", "rank": 8.6, "tags": ["Gemma", "Vector Embeddings"], "file_count": 0}, {"name": "EverythingMenu", "purpose": "Voidtools Everything integration into Windows Shell context menus for instant search.", "status": "Active Desktop Mod", "tier": "B", "rank": 8.4, "tags": ["Everything", "C++", "Shell Hook"], "file_count": 18}, {"name": "Firefly", "purpose": "Local lightweight API proxy and event dispatcher for microservices.", "status": "Infrastructure", "tier": "C", "rank": 7.8, "tags": ["API Proxy", "Microservices"], "file_count": 21}, {"name": "FireSpider", "purpose": "Academic multi-format document compiler (Markdown to PDF/Word/HTML with KaTeX/ReportLab).", "status": "Flagship Core", "tier": "S", "rank": 9.8, "tags": ["ReportLab", "KaTeX", "Web Audio"], "file_count": 68}, {"name": "folderbeam", "purpose": "Instant local LAN file sharing dual-engine (WebDAV + Responsive Browser UI).", "status": "Production", "tier": "A", "rank": 9.4, "tags": ["WebDAV", "LAN Transfer", "Python"], "file_count": 59}, {"name": "GENESIS", "purpose": "System initialization and multi-partition boot configuration orchestrator.", "status": "Architectural Seed", "tier": "B", "rank": 8.5, "tags": ["EFI", "Boot Recovery"], "file_count": 22}, {"name": "Github Copilot", "purpose": "Meta-workspace for experimentation, prompt modification, and copilot tooling.", "status": "Exploration", "tier": "C", "rank": 7.5, "tags": ["Copilot", "Tooling"], "file_count": 11}, {"name": "Hardware_Architecture_Treatise", "purpose": "Deep technical documentation and hardware telemetry blueprints (MSI Crosshair A16 HX).", "status": "Completed Monograph", "tier": "S", "rank": 9.6, "tags": ["UEFI", "VRM", "SMU Telemetry"], "file_count": 6}, {"name": "identifier_mcp", "purpose": "MCP tool for live GPU model probing, tribrid role detection, and prompt injection.", "status": "Active MCP Tool", "tier": "A", "rank": 9.1, "tags": ["MCP", "GPU Probing", "Tribrid"], "file_count": 5}, {"name": "KOBOLDCPP", "purpose": "Local KoboldCPP inference launcher scripts and GGUF model configurations.", "status": "Runtime Harness", "tier": "B", "rank": 8.0, "tags": ["GGUF", "KoboldCPP"], "file_count": 152}, {"name": "LastWeekTonight_Animation", "purpose": "Motion graphics and animation assets for LWT segments and presentation decks.", "status": "Creative Suite", "tier": "B", "rank": 8.2, "tags": ["Animation", "SVG", "Motion"], "file_count": 4}, {"name": "LightTextGUI", "purpose": "Ultra-fast low-latency WinForms/WPF text viewer for huge log files.", "status": "Desktop Utility", "tier": "C", "rank": 7.9, "tags": ["WinForms", "Log Viewer"], "file_count": 1}, {"name": "LWT", "purpose": "Last Week Tonight comedic/journalistic research engine and segment synthesizer.", "status": "Active Skill/Repo", "tier": "A", "rank": 9.3, "tags": ["LWT", "Multi-Lane Research", "Fact-Check"], "file_count": 5}, {"name": "lwt-subtitle-scraper", "purpose": "Automated scraper, cleaner, and archiver for Last Week Tonight official transcripts.", "status": "Data Scraper", "tier": "B", "rank": 8.7, "tags": ["Subtitles", "SRT Cleaner"], "file_count": 557}, {"name": "MedGemma_Projects", "purpose": "Clinical AI pipelines, medical text distillation, and diagnostic differential models.", "status": "Clinical Flagship", "tier": "S", "rank": 9.7, "tags": ["Clinical CPG", "PhilHealth", "Gemma"], "file_count": 131}, {"name": "Medical-Scripter", "purpose": "Prescription generation, dosage calculations, and clinical documentation automation.", "status": "Clinical Practice Tool", "tier": "A", "rank": 9.4, "tags": ["Medical Rx", "Dosage Calc", "Clinical"], "file_count": 4152}, {"name": "mindshub", "purpose": "Open-source collaborative AI research workspace fork and translation layer.", "status": "Open-Source Fork", "tier": "C", "rank": 7.9, "tags": ["MindsHub", "Open Source"], "file_count": 2804}, {"name": "NES_blueprint", "purpose": "Architectural schematics and historical blueprints of the Neuroplastic Engram Shell.", "status": "System Foundation", "tier": "S", "rank": 9.5, "tags": ["NES Connectome", "Engrams"], "file_count": 26}, {"name": "NES_bluprint", "purpose": "Neuroplastic Engram Shell blank seed engine and early connectome scaffold.", "status": "Foundation Seed", "tier": "C", "rank": 7.5, "tags": ["NES Seed", "Scaffold"], "file_count": 25}, {"name": "OneIcon", "purpose": "Multi-resolution Windows icon compiler (.ico, .png, .svg) for custom shell apps.", "status": "Design Tool", "tier": "B", "rank": 8.3, "tags": ["Icons", "ChromaGoogle"], "file_count": 16}, {"name": "opencode", "purpose": "OpenCode terminal AI workspace engine and TypeScript console application.", "status": "Developer Engine", "tier": "A", "rank": 9.0, "tags": ["TypeScript", "Terminal AI"], "file_count": 6638}, {"name": "OpenRouterAgent", "purpose": "OpenRouter cloud agent gateway for model escalation (DeepSeek, Claude 3.5, etc.).", "status": "Operational Bridge", "tier": "B", "rank": 8.7, "tags": ["API Gateway", "OpenRouter"], "file_count": 2}, {"name": "present", "purpose": "Workspace directory for presentation slides and live demonstration assets.", "status": "Staging Seed", "tier": "C", "rank": 6.0, "tags": ["Slides", "Presentations"], "file_count": 0}, {"name": "QLColorCode-extra", "purpose": "Custom QuickLook colorizing extensions for esoteric source code formats.", "status": "Extension Mod", "tier": "C", "rank": 7.5, "tags": ["QuickLook", "Syntax Color"], "file_count": 227}, {"name": "QuickLook", "purpose": "Modern Windows spacebar preview platform transformed into active sensory intake organ.", "status": "Flagship Platform", "tier": "S", "rank": 9.9, "tags": ["Tokyo-Night", "GPU Distillation", "C#"], "file_count": 1022}, {"name": "QuickLook.Common", "purpose": "Shared C# / .NET library for QuickLook plugins and inter-process communication.", "status": "Core Library", "tier": "A", "rank": 9.0, "tags": ["C#", "IPC", ".NET"], "file_count": 41}, {"name": "QuickLook.CyberLens", "purpose": "Custom QuickLook preview plugin for hex, binary, and kernel log inspection.", "status": "Operational Plugin", "tier": "A", "rank": 9.1, "tags": ["Hex Viewer", "Binary Inspection"], "file_count": 6}, {"name": "QuickLook.WebPlugins", "purpose": "HTML/JS preview engine for QuickLook with syntax highlighting and live KaTeX.", "status": "Operational Plugin", "tier": "A", "rank": 9.2, "tags": ["Chromium", "KaTeX", "Web View"], "file_count": 182}, {"name": "RAMs and EXEs", "purpose": "Binary sandbox and memory dump staging folder.", "status": "Staging Seed", "tier": "C", "rank": 6.0, "tags": ["Binary Staging"], "file_count": 0}, {"name": "SidePanelOmni", "purpose": "Docked Windows desktop sidebar for instant agent status, notes, and telemetry.", "status": "Active Desktop HUD", "tier": "B", "rank": 8.6, "tags": ["Desktop HUD", "VRAM Monitor"], "file_count": 8}, {"name": "SillyTavern", "purpose": "Advanced LLM frontend configured with local model endpoints and custom cards.", "status": "Active Frontend", "tier": "B", "rank": 8.5, "tags": ["Frontend", "Local LLM"], "file_count": 5269}, {"name": "skills-mattpocock", "purpose": "Curated collection of developer skills and agent workflows adapted from Matt Pocock.", "status": "Skill Reference Pack", "tier": "B", "rank": 8.3, "tags": ["Agent Skills", "TypeScript"], "file_count": 164}, {"name": "SleepyMonkey", "purpose": "Autonomous background sentry detecting suspicious network scans and honeypot ports.", "status": "Security Sentry", "tier": "A", "rank": 9.0, "tags": ["Sentry", "Honeypot", "DEFCON"], "file_count": 6}, {"name": "Stimulant", "purpose": "Windows system power and display sleep inhibitor during long training runs.", "status": "System Utility", "tier": "C", "rank": 7.6, "tags": ["Win32 API", "Power State"], "file_count": 63}, {"name": "Subtitler", "purpose": "Automated video subtitle generation and hardcoding via Whisper and FFmpeg.", "status": "Media Pipeline", "tier": "B", "rank": 8.7, "tags": ["Whisper", "FFmpeg", "Subtitles"], "file_count": 1}, {"name": "SynapseMD", "purpose": "Knowledge graph builder and wikilink connectome validator for medical & coding notes.", "status": "Core Knowledge Tool", "tier": "A", "rank": 9.4, "tags": ["Graph", "Connectome", "Synapses"], "file_count": 41}, {"name": "Tablet-LLM-Host", "purpose": "Local web server and UI streaming LLM inference from main rig to tablet on LAN.", "status": "Operational Service", "tier": "B", "rank": 8.8, "tags": ["Bedside UI", "LAN Server"], "file_count": 14}, {"name": "teich", "purpose": "Agent data infrastructure for dataset generation, normalisation, and response masking.", "status": "ML Infrastructure", "tier": "A", "rank": 9.1, "tags": ["Dataset Engine", "PyPI Grade"], "file_count": 97}, {"name": "unsloth", "purpose": "Local Unsloth acceleration repo and Blackwell CUDA 12.8 installation scripts.", "status": "Core ML Engine", "tier": "S", "rank": 9.6, "tags": ["Blackwell", "CUDA 12.8", "80% VRAM Save"], "file_count": 5150}, {"name": "unsloth_bridge", "purpose": "Bridge server linking Unsloth Studio (port 8888) with Antigravity agent workflows.", "status": "Active Bridge", "tier": "B", "rank": 8.8, "tags": ["Bridge", "Unsloth Studio"], "file_count": 1}, {"name": "Unsloth_Projects", "purpose": "Fine-tuning scripts, LoRA adapters, and dataset compilers using Unsloth on RTX 5070.", "status": "ML Foundry", "tier": "S", "rank": 9.5, "tags": ["LoRA", "Fine-Tuning", "RTX 5070"], "file_count": 23}, {"name": "User_Protocols", "purpose": "Living repository of operational protocols, epistemic treatises, and privacy gates.", "status": "Governance Corpus", "tier": "A", "rank": 9.3, "tags": ["3rd Mask", "Axioms", "CPG"], "file_count": 8}, {"name": "Utilities", "purpose": "PowerShell and environment repair scripts (PowerShell 7, Claude Code, PATH fixers).", "status": "Maintenance", "tier": "B", "rank": 8.0, "tags": ["Maintenance", "PowerShell 7"], "file_count": 1}, {"name": "ViberAgentBridge", "purpose": "Encrypted Viber bot bridge connecting phone to local AI rig via webhook.", "status": "Operational Gateway", "tier": "B", "rank": 8.9, "tags": ["Viber Bot", "Webhook", "Mobile"], "file_count": 9}, {"name": "VivaldiExtToggle", "purpose": "Vivaldi / Chromium browser extension for instant single-click extension toggling.", "status": "Active Extension", "tier": "B", "rank": 8.2, "tags": ["Vivaldi", "Extension"], "file_count": 10}, {"name": "WinToolbox", "purpose": "Collection of Windows administrative scripts and registry tweaks.", "status": "Toolbox", "tier": "C", "rank": 7.2, "tags": ["Windows Admin", "Registry"], "file_count": 3}, {"name": "XeonWraith-ThreadReaper", "purpose": "Dual-engine sovereign Windows kernel triage (XeonWraith) & PowerShell remediation (ThreadReaper).", "status": "Flagship Kernel Diagnostic", "tier": "S", "rank": 9.8, "tags": ["Kernel Telemetry", "Ring 0", "ShareGPT"], "file_count": 17}];
+    let currentTier = 'ALL';
+    let searchQuery = '';
+
+    function render() {
+      const grid = document.getElementById('projectsGrid');
+      const filtered = projects.filter(p => {
+        const matchesTier = currentTier === 'ALL' || p.tier === currentTier;
+        const q = searchQuery.toLowerCase();
+        const matchesSearch = p.name.toLowerCase().includes(q) || 
+                              p.purpose.toLowerCase().includes(q) || 
+                              p.tags.some(t => t.toLowerCase().includes(q));
+        return matchesTier && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 4rem 0; color: #8b949e; font-family: monospace;">No matching projects found.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        return `
+          <div class="card card-${p.tier}">
+            <div>
+              <div class="card-header">
+                <div>
+                  <div class="project-title">${p.name}</div>
+                  <div class="project-status">${p.status}</div>
+                </div>
+                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                  <span class="tier-pill">${p.tier}-TIER</span>
+                  <div class="rank-badge badge-${p.tier}">${p.rank.toFixed(1)}</div>
+                </div>
+              </div>
+              <div class="project-purpose" style="margin-top: 0.6rem;">${p.purpose}</div>
+            </div>
+
+            <div class="card-footer">
+              <div class="tags">
+                ${p.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+              </div>
+              <div class="file-count">${p.file_count} files</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterTier(tier) {
+      currentTier = tier;
+      document.querySelectorAll('.tier-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + tier);
+      if (activeBtn) activeBtn.classList.add('active');
+      render();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
